@@ -1,0 +1,44 @@
+﻿@page "/manage-feedback" 
+@using Microsoft.AspNetCore.Authorization
+@using SMMT_Test.Dtos;
+@using Radzen;
+
+
+@attribute [Authorize]
+
+<PageTitle>Manage Feedback</PageTitle>
+
+<RadzenDialog />
+
+
+<RadzenText TextStyle="TextStyle.H3" TagName="TagName.H1" Class="my-4">
+    Category
+</RadzenText>
+
+
+<RadzenButton ButtonStyle="ButtonStyle.Primary" Class="mt-2 mb-4" Text="Add New Feedback" Click="Create" />
+
+
+<RadzenDataGrid AllowFiltering="true" AllowColumnResize="true" GridLines="@GridLines"
+                FilterMode="FilterMode.Advanced" PageSize="20" AllowPaging="true" AllowSorting="true" Data="@feedbacks" TItem="FeedbackDto" ColumnWidth="300px"
+                FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                LogicalFilterOperator="LogicalFilterOperator.Or" FilterPopupRenderMode="PopupRenderMode.OnDemand">
+    <Columns>
+        <RadzenDataGridColumn TItem="FeedbackDto" Property="Id" Title="Id" Frozen="true" Width="20" />
+
+
+        <RadzenDataGridColumn TItem="FeedbackDto" Property="CustomerName" Title="Customer Name" Frozen="true" Width="200" />
+        <RadzenDataGridColumn TItem="FeedbackDto" Property="FeedbackMessage" Title="Message" Frozen="true" Width="400" />
+        <RadzenDataGridColumn TItem="FeedbackDto" Property="DateSubmitted" Title="Date Submitted" Frozen="true" Width="50" />
+
+
+        <RadzenDataGridColumn TItem="FeedbackDto" Title="Actions" Width="150px">
+            <Template>
+                <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium" Click="@(args => Edit(context))" @onclick:stopPropagation="true">
+                </RadzenButton>
+                <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Variant="Variant.Flat" Shade="Shade.Lighter" Size="ButtonSize.Medium" Class="my-1 ms-1" Click="@(args => Delete(context))" @onclick:stopPropagation="true">
+                </RadzenButton>
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>

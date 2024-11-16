@@ -1,0 +1,38 @@
+﻿@page "/EditFeedback"
+@using Microsoft.AspNetCore.Authorization
+@using Radzen.Blazor;
+@using SMMT_Test.Dtos;
+@using Radzen;
+
+@attribute [Authorize]
+
+<RadzenTemplateForm TItem="FeedbackDto" Data="@model" Submit=@OnSubmit>
+    <div class="row" style=" margin-bottom: 16px">
+        <div class="col-md-4">
+            <RadzenLabel Text="Customer Name" />
+        </div>
+        <div class="col">
+            <RadzenTextBox @bind-Value="@model.CustomerName" Name="CustomerName" />
+            <RadzenRequiredValidator Text="Customer Name is required" Style="position:relative" Popup="true" Component="CustomerName" />
+            <RadzenLengthValidator Text="Customer Name should be max 100 characters" Style="position: relative" Popup="true" Component="CustomerName" Max="100" />
+        </div>
+        <div style="margin-bottom:10px"></div>
+        <div class="col-md-4">
+            <RadzenLabel Text="Message" />
+        </div>
+        <div class="col">
+            <RadzenTextArea @bind-Value="@model.FeedbackMessage" Name="FeedbackMessage" />
+            <RadzenRequiredValidator Text="Message is required" Style="position:relative" Popup="true" Component="FeedbackMessage" />
+            <RadzenLengthValidator Text="Message should be max 500 characters" Style="position: relative" Popup="true" Component="FeedbackMessage" Max="500" />
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col">
+            <RadzenButton ButtonType="ButtonType.Submit" Text="Save" />
+        </div>
+    </div>
+</RadzenTemplateForm>
+
