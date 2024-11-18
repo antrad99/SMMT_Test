@@ -34,6 +34,11 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
+// N.B. Azure App Settings Connection String overwrites the value in app.settings.json file, but it is in plain text.
+// The Connection String could be stored in Azure Key Vault which is encrypted and it provides a centralised way to manage secrets. 
+// For App Service to access the Key Vault we need to enable Managed Identity, which is like Windows Service Account on-premises so credentials are not stored.
+// Managed Identity uses Microsoft Entra ID which can grant access to other resources such as SQL Server, in this case we do not need to store username and password in the Key Vault, because it is not needed.
+//
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -71,7 +76,14 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-ApplyMigration();
+// Database migration should be done as part of deployment and in a controlled way.
+// THIS IS TO PREVENT FOR HAVING MULTIPLE UPDATES AT THE SAME TIME.
+// Production database migration approaches include:
+// Using migrations to create SQL scripts and using the SQL scripts in deployment. (script-migration command can be added in the pipeline during the deployment)
+// OR
+// Running dotnet ef database update from a controlled environment.
+if (app.Environment.IsDevelopment())
+    ApplyMigration();
 
 app.Run();
 
@@ -79,18 +91,21 @@ void ApplyMigration()
 {
     using (var scope = app.Services.CreateScope())
     {
-        var _Db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var services = scope.ServiceProvider;
 
-        if (_Db != null)
+        var context = services.GetRequiredService<ApplicationDbContext>();
+
+        if (context != null)
         {
-            if (_Db.Database.GetPendingMigrations().Any())
+            if (context.Database.GetPendingMigrations().Any())
             {
                 Log.Information("Migration has started.");
-                _Db.Database.Migrate();
+                context.Database.Migrate();
                 Log.Information("Migration has ended.");
             }
 
-            //Add here any db changes
+            //Call static method to create lookup values and sample data
+            SeedData.Initialize(services);
         }
     }
 }
